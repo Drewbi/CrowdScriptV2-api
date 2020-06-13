@@ -9,8 +9,8 @@ const s3 = new AWS.S3({
 
 const config = {
   bucket_name: 'crowdscriptttt',
-  uploadExpiry: 60 * 10, // 10 min
-  downloadExpiry: 60 * 60 * 24 * 10, // 10 days
+  uploadExpiry: 60, // 10 min
+  downloadExpiry: 60 * 60 * 24, // 1 days
   fileMinSize: 100,
   fileMaxSize: 8 * 1000 * 1000 * 1000 // 1 Gb
 }
@@ -41,36 +41,12 @@ const generateKey = (contentType) => {
 const getUploadLink = async (key, contentType) => {
   const params = {
     Bucket: config.bucket_name,
-    Fields: {
-      key
-    },
+    Key: key,
     Expires: config.uploadExpiry,
-    Conditions: [
-      {
-        bucket: config.bucket_name
-      },
-      {
-        key // our generated key
-      },
-      {
-        acl: 'private' // private bucket
-      },
-      {
-        'Content-Type': contentType
-      },
-      ['content-length-range', config.fileMinSize, config.fileMaxSize]
-    ]
+    ContentType: contentType
   }
 
-  const signedPost = await s3.createPresignedPost(params)
-
-  Object.assign(signedPost,
-    {
-      'Content-Type': contentType,
-      acl: 'private'
-    }
-  )
-  return signedPost
+  return s3.getSignedUrl('putObject', params)
 }
 
 const deleteLink = (key) => {

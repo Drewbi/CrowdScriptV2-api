@@ -21,7 +21,7 @@ router.post('/api/authentication', async (req, res) => {
   if (!passwordCorrect) return res.status(400).json({ message: 'Password Incorrect' })
 
   config.subject = user.email
-  config.audience = process.env.VERCEL_URL || req.headers.host
+  config.audience = process.env.VERCEL_URL || req.headers['x-forwarded-host']
   const token = sign({ id: user.id, admin: user.admin }, config)
   const expiry = Date.now() + 10 * 24 * 60 * 60 * 1000
   return res.status(200).json({ token, expiry })
