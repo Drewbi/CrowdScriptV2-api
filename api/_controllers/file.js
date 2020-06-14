@@ -19,7 +19,8 @@ const createUploadLink = async (req, res) => {
   try {
     const s3key = generateKey(contentType)
     const signedData = await getUploadLink(s3key, contentType)
-    res.status(200).json(signedData)
+    const suffix = contentType === 'audio/mpeg' ? '.mp3' : '.srt'
+    res.status(200).json({ url: signedData, key: `${s3key}${suffix}` })
   } catch (err) {
     res.status(400).json({ message: err.message })
   }
