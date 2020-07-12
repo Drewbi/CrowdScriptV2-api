@@ -41,8 +41,7 @@ const deleteEpisode = async (req, res) => {
 }
 
 const updateEpisode = async (req, res) => {
-  const { active, name, completed } = req.body
-  const { number } = req.body
+  const { active, name, completed, number } = req.body
   const episode = await Episode.findOne({ number })
   if (!episode) return res.status(404).json({ message: 'Episode not found' })
   if (active !== undefined) episode.active = active
