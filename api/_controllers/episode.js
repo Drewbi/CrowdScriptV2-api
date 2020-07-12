@@ -20,6 +20,7 @@ const createEpisode = async (req, res, next) => {
   episode.src = src
   episode.srt = srt
   episode.completed = false
+  episode.active = true
 
   try {
     await episode.save()
@@ -39,4 +40,15 @@ const deleteEpisode = async (req, res) => {
     : res.status(400).json({ message: 'Failed to delete episode' })
 }
 
-module.exports = { getAllEpisodes, getEpisode, createEpisode, deleteEpisode }
+const updateEpisode = async (req, res) => {
+  const { active, name, completed, number } = req.body
+  const episode = await Episode.findOne({ number })
+  if (!episode) return res.status(404).json({ message: 'Episode not found' })
+  if (active !== undefined) episode.active = active
+  if (name !== undefined) episode.name = name
+  if (completed !== undefined) episode.completed = completed
+  await episode.save()
+  return res.status(200).json({ message: 'Successfully updated episode' })
+}
+
+module.exports = { getAllEpisodes, getEpisode, createEpisode, deleteEpisode, updateEpisode }

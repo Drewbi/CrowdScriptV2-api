@@ -23,6 +23,10 @@ const episodeSchema = mongoose.Schema({
   completed: {
     type: Boolean,
     required: true
+  },
+  active: {
+    type: Boolean,
+    required: true
   }
 })
 
