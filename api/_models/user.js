@@ -18,6 +18,10 @@ const userSchema = mongoose.Schema({
     type: Boolean,
     default: false
   },
+  banned: {
+    type: Boolean,
+    default: false
+  },
   hash: {
     type: String,
     required: true
