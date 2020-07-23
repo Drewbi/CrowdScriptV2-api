@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const User = mongoose.model('User')
 const Submission = mongoose.model('Submission')
+const Session = mongoose.model('Session')
 
 const { generateSalt, generateHash } = require('../_utils/password')
 
@@ -79,11 +80,12 @@ const banUser = async (req, res, next) => {
     if (result.ok === 1) {
       try {
         await Submission.deleteMany({ user: id })
+        await Session.deleteMany({ user: id })
       } catch (err) {
-        return res.status(500).json({ message: 'Failed to delete user sessions' })
+        return res.status(500).json({ message: 'Failed to delete user sessions or submissions' })
       }
-    } else return res.status(400).json({ message: 'Failed to delete user' })
-    res.status(200).json({ message: 'Successfully deleted user' })
+    } else return res.status(400).json({ message: 'Failed to ban user' })
+    res.status(200).json({ message: 'Successfully banned user' })
   } catch (err) {
     if (err.name === 'CastError') res.status(401).json({ message: 'Invalid Id' })
     else res.status(400).json({ message: 'Error occured finding user' })
