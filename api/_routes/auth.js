@@ -17,6 +17,7 @@ router.post('/api/authentication', async (req, res) => {
   const user = await User.findOne({ email })
 
   if (!user) return res.status(404).json({ message: 'Email not registered' })
+  if (user.banned) return res.status(400).json({ message: 'Could not log in' })
   const passwordCorrect = validatePassword(password, user)
   if (!passwordCorrect) return res.status(400).json({ message: 'Password Incorrect' })
 

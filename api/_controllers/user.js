@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 const User = mongoose.model('User')
+const Submission = mongoose.model('Submission')
+const Session = mongoose.model('Session')
 
 const { generateSalt, generateHash } = require('../_utils/password')
 
@@ -69,6 +71,44 @@ const createUser = async (req, res, next) => {
   }
 }
 
+const banUser = async (req, res, next) => {
+  const { id } = req.params
+  try {
+    const user = await User.findById(id)
+    if (!user) return res.status(404).json({ message: 'User not found' })
+    const result = await user.updateOne({ banned: true })
+    if (result.ok === 1) {
+      try {
+        await Submission.deleteMany({ user: id })
+        await Session.deleteMany({ user: id })
+      } catch (err) {
+        return res.status(500).json({ message: 'Failed to delete user sessions or submissions' })
+      }
+    } else return res.status(400).json({ message: 'Failed to ban user' })
+    res.status(200).json({ message: 'Successfully banned user' })
+  } catch (err) {
+    if (err.name === 'CastError') res.status(401).json({ message: 'Invalid Id' })
+    else res.status(400).json({ message: 'Error occured finding user' })
+  }
+}
+
+const editUser = async (req, res) => {
+  const { id } = req.params
+  try {
+    const { banned, credit, name } = req.body
+    const user = await User.findById(id)
+    if (!user) return res.status(404).json({ message: 'User not found' })
+    if (banned !== undefined) user.banned = banned
+    if (credit !== undefined) user.credit = credit
+    if (name !== undefined) user.name = name
+    await user.save()
+    res.status(200).json({ message: 'Successfully edited user' })
+  } catch (err) {
+    if (err.name === 'CastError') res.status(401).json({ message: 'Invalid Id' })
+    else res.status(400).json({ message: 'Error occured finding user' })
+  }
+}
+
 const deleteUser = async (req, res, next) => {
   const { email } = req.body
   const user = await User.findOne({ email })
@@ -79,4 +119,4 @@ const deleteUser = async (req, res, next) => {
     : res.status(400).json({ message: 'Failed to delete user' })
 }
 
-module.exports = { getAllUsers, getUserById, getUserFromJWT, createUser, deleteUser }
+module.exports = { getAllUsers, getUserById, getUserFromJWT, createUser, banUser, editUser, deleteUser }

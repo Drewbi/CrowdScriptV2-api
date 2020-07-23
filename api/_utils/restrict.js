@@ -27,7 +27,7 @@ const verifyAdmin = (req, res, next) => {
 }
 
 const verifyUser = (req, res, next) => {
-  res.locals.user
+  res.locals.user && !res.locals.user.banned
     ? next()
     : res.status(401).json({ message: 'Requires user authorisation' })
 }
